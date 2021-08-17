@@ -6,32 +6,38 @@ import dataclasses
 import time
 from consts import REPO_ROOT
 from args import Args
-from mmap import mmap, ACCESS_WRITE
+from mmap import mmap
 
 WriteQueueT = NewType("WriteQueueT", "Queue[Optional[bytes]]")  # type: ignore
 
 out_subdir = "out-append2"
 
+BLOCK_SIZE = 4096 * 4096
 
 @dataclasses.dataclass(frozen=True)
 class FileAppender:
     file_path: str
     write_queue: WriteQueueT
+
     def start(self):
+        touched = False
 
         f = open(self.file_path, "wb")
-        f.write(b'\0')
+        f.write(b'\0'*BLOCK_SIZE)
         f.close()
 
+        append_pos = 0
         with open(self.file_path, "r+b") as f:
             with mmap(f.fileno(), 0) as m:
                 while True:
                     b = self.write_queue.get()
                     if b is None:
                         return
-                    append_pos = m.size()
-                    m.resize(append_pos + len(b))
-                    m[append_pos:] = b
+                    while append_pos + len(b) > m.size():
+                        m.resize(m.size() + BLOCK_SIZE)
+                    
+                    m[append_pos:append_pos+len(b)] = b
+                    append_pos += len(b)
 
 
 @dataclasses.dataclass(frozen=True)
