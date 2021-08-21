@@ -1,4 +1,4 @@
-from multiprocess import Queue, Pool, Process  # type: ignore
+from multiprocess import Queue, Process  # type: ignore
 from typing import Optional, NewType
 import os
 import shutil

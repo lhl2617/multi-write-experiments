@@ -45,7 +45,6 @@ def main():
         os.makedirs(out_dir)
 
         time_start = time.perf_counter()
-
         writer_procs = [
             Process(
                 target=Writer(
@@ -62,15 +61,22 @@ def main():
         for writer_proc in writer_procs:
             writer_proc.join()
 
+        join_time_start = time.perf_counter()
+
         Joiner(
             out_file_path=os.path.join(out_dir, "out.txt"),
             in_file_paths=[
                 os.path.join(out_dir, f"{i}.txt") for i in range(args.num_writers)
             ],
         ).start()
+
         time_end = time.perf_counter()
         time_taken = time_end - time_start
-        print(f"Trial {trial+1}/{args.trials}: Took {time_taken}s")
+        join_time = time_end - join_time_start
+        write_time = time_taken - join_time
+        print(
+            f"Trial {trial+1}/{args.trials}: Took {time_taken}s -- write took {write_time}, join took {join_time}"
+        )
 
 
 if __name__ == "__main__":

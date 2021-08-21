@@ -1,8 +1,3 @@
 import os
 
 REPO_ROOT = os.path.dirname(os.path.realpath(__file__))
-
-DEFAULT_NUM_WRITERS = 4
-DEFAULT_NUM_LINES_PER_WRITER = 100000
-DEFAULT_LINE_LEN = 1000
-DEFAULT_TRIALS = 3

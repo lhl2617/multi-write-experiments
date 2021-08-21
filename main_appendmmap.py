@@ -1,4 +1,4 @@
-from multiprocess import Queue, Pool, Process  # type: ignore
+from multiprocess import Queue, Process  # type: ignore
 from typing import Optional, NewType
 import os
 import shutil
@@ -12,18 +12,17 @@ WriteQueueT = NewType("WriteQueueT", "Queue[Optional[bytes]]")  # type: ignore
 
 out_subdir = "out-append2"
 
-BLOCK_SIZE = 4096 * 4096
 
 @dataclasses.dataclass(frozen=True)
 class FileAppender:
     file_path: str
     write_queue: WriteQueueT
+    block_size: int
 
     def start(self):
-        touched = False
-
+        # Write block_size of \0's so that we're not mmap-ing an empty file
         f = open(self.file_path, "wb")
-        f.write(b'\0'*BLOCK_SIZE)
+        f.write(b"\0" * self.block_size)
         f.close()
 
         append_pos = 0
@@ -34,9 +33,9 @@ class FileAppender:
                     if b is None:
                         return
                     while append_pos + len(b) > m.size():
-                        m.resize(m.size() + BLOCK_SIZE)
-                    
-                    m[append_pos:append_pos+len(b)] = b
+                        m.resize(m.size() + self.block_size)
+
+                    m[append_pos: append_pos + len(b)] = b
                     append_pos += len(b)
 
 
@@ -64,7 +63,7 @@ def main():
 
         appender_proc = Process(
             target=FileAppender(
-                file_path=os.path.join(out_dir, "out.txt"), write_queue=write_queue
+                file_path=os.path.join(out_dir, "out.txt"), write_queue=write_queue, block_size=args.appendmmap_block_size
             ).start
         )
         appender_proc.start()
