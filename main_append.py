@@ -1,4 +1,4 @@
-from multiprocess import Queue, Process  # type: ignore
+from multiprocess import Queue, Process
 from typing import Optional, NewType
 import os
 import shutil
@@ -7,7 +7,7 @@ import time
 from consts import REPO_ROOT
 from args import Args
 
-WriteQueueT = NewType("WriteQueueT", "Queue[Optional[bytes]]")  # type: ignore
+WriteQueueT = NewType("WriteQueueT", "Queue[Optional[bytes]]")
 
 out_subdir = "out-append"
 
@@ -46,7 +46,7 @@ def main():
         os.makedirs(out_dir)
 
         time_start = time.perf_counter()
-        write_queue: "Queue[Optional[bytes]]" = Queue()
+        write_queue: WriteQueueT = Queue()
 
         appender_proc = Process(
             target=FileAppender(

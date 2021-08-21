@@ -1,4 +1,4 @@
-from multiprocess import Process  # type: ignore
+from multiprocess import Process
 import os
 import shutil
 import dataclasses
