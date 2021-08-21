@@ -10,7 +10,7 @@ from mmap import mmap
 
 WriteQueueT = NewType("WriteQueueT", "Queue[Optional[bytes]]")  # type: ignore
 
-out_subdir = "out-append2"
+out_subdir = "out-appendmmap"
 
 
 @dataclasses.dataclass(frozen=True)
